@@ -301,7 +301,7 @@ void depth_limited_search(Node root, int depth_limit, SEARCH_INFO *return_info)
         root.calculate_succs_states(current_node_neighbors);
         return_info->number_of_expanded_nodes++;
 
-        for(int i = root.get_number_of_succs() - 1; i >= 0; i--)
+        for(int i = 0; i < root.get_number_of_succs(); i++)
         {
             if(!Node::is_states_equal(current_node_neighbors[i], root.get_parent_state()))
                 depth_limited_search(Node(current_node_neighbors[i], root.get_g_value() + 1, root.get_state()), depth_limit - 1, return_info);
