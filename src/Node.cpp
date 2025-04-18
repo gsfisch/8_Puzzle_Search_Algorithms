@@ -1,13 +1,15 @@
 #include "../include/Node.hpp"
 //#include <iostream>
 
+long Node::global_node_id = 0;
+
 // Constructors
 Node::Node()
 {
 
 }
 
-Node::Node(unsigned short state[9], float g_value, unsigned short parent_state[9])
+Node::Node(unsigned short state[9], double g_value, unsigned short parent_state[9])
 {
     // Make Node state
     for(int i = 0; i < 9; i++)
@@ -31,6 +33,9 @@ Node::Node(unsigned short state[9], float g_value, unsigned short parent_state[9
 
     // Calculates blank space index
     this->blank_index = this->calculate_blank_index();
+
+    this->node_id = global_node_id;
+    global_node_id++;
 }
 
 // Getters
@@ -48,17 +53,17 @@ unsigned short Node::get_number_of_succs()
     return this->number_of_succs;
 }
 
-float Node::get_f_value()
+double Node::get_f_value()
 {
     return this->f_value;
 }
 
-float Node::get_g_value()
+double Node::get_g_value()
 {
     return this->g_value;
 }
 
-float Node::get_h_value()
+double Node::get_h_value()
 {
     return this->h_value;
 }
@@ -115,7 +120,7 @@ void Node::get_x_y_coords(int number, int coords[2])
     coords[1] = number % 3; // Calculates horizontal coord
 }
 
-int Node::calculate_heuristic()
+double Node::calculate_heuristic()
 {
     int sum = 0;
     int difference;

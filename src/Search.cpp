@@ -3,6 +3,19 @@
 #include <unordered_map>
 #include <string>
 
+struct compare_nodes_bfs {
+    bool operator()(Node node1, Node node2) {
+        // Best G
+        if(node1.get_g_value() != node2.get_g_value())
+            return node1.get_g_value() > node2.get_g_value();
+
+        if(node1.get_h_value() != node2.get_h_value())
+            return node1.get_h_value() > node2.get_h_value();
+
+        return node1.node_id > node2.node_id;
+    }
+};
+
 struct compare_nodes_gbfs {
     bool operator()(Node node1, Node node2) {
 
@@ -14,7 +27,7 @@ struct compare_nodes_gbfs {
         if(node1.get_g_value() != node2.get_g_value())
             return node1.get_g_value() < node2.get_g_value();
 
-        return true;
+        return node1.node_id < node2.node_id;
     }
 };
 
@@ -29,7 +42,22 @@ struct compare_nodes_a_star {
         if(node1.get_h_value() != node2.get_h_value())
             return node1.get_h_value() > node2.get_h_value();
 
-        return true;
+        return node1.node_id < node2.node_id;
+    }
+};
+
+struct compare_nodes_a_star_15 {
+    bool operator()(Node_15 node1, Node_15 node2) {
+
+        // Best F
+        if(node1.get_g_value() + node1.get_h_value() != node2.get_g_value() + node2.get_h_value())
+            return node1.get_g_value() + node1.get_h_value() > node2.get_g_value() + node2.get_h_value();
+
+        // Best H
+        if(node1.get_h_value() != node2.get_h_value())
+            return node1.get_h_value() > node2.get_h_value();
+
+        return node1.node_id < node2.node_id;
     }
 };
 
@@ -43,9 +71,10 @@ std::string state_to_string(unsigned short state[9])
     return result;
 }
 
+/*
 SEARCH_INFO bfs(Node root)
 {
-    std::queue<Node> q;
+    std::priority_queue<Node, std::vector<Node>, compare_nodes_bfs> q;
     std::unordered_map<std::string, bool> closed;
     unsigned short current_node_neighbors[4][9];
     SEARCH_INFO return_info;
@@ -60,7 +89,7 @@ SEARCH_INFO bfs(Node root)
     while(!q.empty())
     {
         // Expand next node
-        Node current_node = q.front();
+        Node current_node = q.top();
         q.pop();
 
         if(closed[state_to_string(current_node.get_state())])
@@ -91,6 +120,60 @@ SEARCH_INFO bfs(Node root)
     return_info.cost = -1;
     return return_info;
 }
+*/
+
+SEARCH_INFO bfs(Node root)
+{
+    std::priority_queue<Node, std::vector<Node>, compare_nodes_bfs> q;
+    std::unordered_map<std::string, float> distance;
+    unsigned short current_node_neighbors[4][9];
+    SEARCH_INFO return_info;
+
+    return_info.initial_state_h = root.get_h_value();
+    return_info.mean_h_value = 0;
+    return_info.cost = 0;
+    return_info.number_of_expanded_nodes = 0;
+
+    if(root.get_h_value() <= 32)
+        q.push(root);
+
+    while(!q.empty())
+    {
+        // Expand next node
+        Node current_node = q.top();
+        q.pop();
+        
+        if(distance.count(state_to_string(current_node.get_state()))
+        && distance[state_to_string(current_node.get_state())] <= current_node.get_g_value())
+            continue;
+
+        
+        distance[state_to_string(current_node.get_state())] = current_node.get_g_value();
+        
+        // Check if it is goal
+        if(current_node.is_goal())
+        {
+            return_info.cost = current_node.get_g_value();
+            return return_info;
+        }
+        
+        return_info.number_of_expanded_nodes++;
+
+        // Compute neighbors
+        current_node.calculate_succs_states(current_node_neighbors);
+
+        // Add neighbors to the queue
+        for(int i = 0; i < current_node.get_number_of_succs(); i++)
+        {
+            // Add non parent state to the queue
+            if(!Node::is_states_equal(current_node_neighbors[i], current_node.get_parent_state()))
+                q.push(Node(current_node_neighbors[i], current_node.get_g_value() + 1, current_node.get_state()));
+        }
+    }
+
+    return_info.cost = -1;
+    return return_info;
+}
 
 SEARCH_INFO gbfs(Node root)
 {
@@ -104,7 +187,8 @@ SEARCH_INFO gbfs(Node root)
     return_info.cost = 0;
     return_info.number_of_expanded_nodes = 0;
 
-    q.push(root);
+    if(root.get_h_value() <= 32)
+        q.push(root);
 
     while(!q.empty())
     {
@@ -112,21 +196,23 @@ SEARCH_INFO gbfs(Node root)
         Node current_node = q.top();
         q.pop();
         
-        if(distance.count(state_to_string(current_node.get_state())) && 
-        distance[state_to_string(current_node.get_state())] <= current_node.get_g_value())
+        if(distance.count(state_to_string(current_node.get_state())))
             continue;
 
+        //&& distance[state_to_string(current_node.get_state())] <= current_node.get_g_value())
+        
         distance[state_to_string(current_node.get_state())] = current_node.get_g_value();
-        return_info.number_of_expanded_nodes++;
-        return_info.mean_h_value += current_node.get_h_value();
-
+        
         // Check if it is goal
         if(current_node.is_goal())
         {
             return_info.cost = current_node.get_g_value();
-            return_info.mean_h_value /= return_info.number_of_expanded_nodes;
+            return_info.mean_h_value = (double) (return_info.mean_h_value / return_info.number_of_expanded_nodes);
             return return_info;
         }
+        
+        return_info.mean_h_value += current_node.get_h_value();
+        return_info.number_of_expanded_nodes++;
 
         // Compute neighbors
         current_node.calculate_succs_states(current_node_neighbors);
@@ -165,22 +251,25 @@ SEARCH_INFO a_star(Node root)
         q.pop();
         
         // If better distance has been found, continue
-        if(distance.count(state_to_string(current_node.get_state())) && 
+        if(distance.count(state_to_string(current_node.get_state()))  && 
         distance[state_to_string(current_node.get_state())] <= current_node.get_g_value())
             continue;
 
         // Update distance
         distance[state_to_string(current_node.get_state())] = current_node.get_g_value();
-        return_info.number_of_expanded_nodes++;
-        return_info.mean_h_value += current_node.get_h_value();
-
+        
+        return_info.mean_h_value += (double) current_node.get_h_value();
         // Check if it is goal
         if(current_node.is_goal())
         {
             return_info.cost = current_node.get_g_value();
-            return_info.mean_h_value /= return_info.number_of_expanded_nodes;
+            return_info.mean_h_value /= (double) return_info.number_of_expanded_nodes;
             return return_info;
         }
+        
+        return_info.number_of_expanded_nodes++;
+        //std::cout << current_node.get_h_value() << std::endl;
+        //std::cout << return_info.mean_h_value << std::endl;
 
         // Compute neighbors
         current_node.calculate_succs_states(current_node_neighbors);
@@ -314,4 +403,84 @@ void depth_limited_search(Node root, int depth_limit, SEARCH_INFO *return_info)
     return_info->cost = -1;
 
     return;
+}
+
+SEARCH_INFO a_star_15(Node_15 root)
+{
+    std::priority_queue<Node, std::vector<Node_15>, compare_nodes_a_star_15> q;
+    std::unordered_map<std::string, float> distance;
+    unsigned short current_node_neighbors[4][16];
+    SEARCH_INFO return_info;
+
+    return_info.initial_state_h = root.get_h_value();
+    return_info.mean_h_value = 0;
+    return_info.cost = 0;
+    return_info.number_of_expanded_nodes = 0;
+
+    //std::cout << "Dentro do a* 15" << std::endl;
+
+    q.push(root);
+
+    while(!q.empty())
+    {
+        // Expand next node
+        Node_15 current_node = q.top();
+        q.pop();
+        
+        // If better distance has been found, continue
+        if(distance.count(state_to_string_15(current_node.get_state()))  && 
+        distance[state_to_string_15(current_node.get_state())] <= current_node.get_g_value())
+            continue;
+
+        // Update distance
+        distance[state_to_string_15(current_node.get_state())] = current_node.get_g_value();
+        
+        return_info.mean_h_value += (double) current_node.get_h_value();
+
+        //std::cout << "1" << std::endl;
+
+        // Check if it is goal
+        if(current_node.is_goal())
+        {
+            return_info.cost = current_node.get_g_value();
+            return_info.mean_h_value /= (double) return_info.number_of_expanded_nodes;
+            return return_info;
+        }
+        
+        return_info.number_of_expanded_nodes++;
+        //std::cout << current_node.get_h_value() << std::endl;
+        //std::cout << return_info.mean_h_value << std::endl;
+        //std::cout << "2" << std::endl;
+        // Compute neighbors
+        current_node.calculate_succs_states(current_node_neighbors);
+
+        //std::cout << "3" << std::endl;
+
+        // Add neighbors to the queue
+        for(int i = 0; i < current_node.get_number_of_succs(); i++)
+        {
+            // Add non parent state to the queue
+            if(!Node_15::is_states_equal(Node_15::get_long_long_from_array(current_node_neighbors[i]), current_node.get_parent_state()))
+                q.push(Node_15(Node_15::get_long_long_from_array(current_node_neighbors[i]), current_node.get_g_value() + 1, current_node.get_state()));
+        }                   
+    }
+
+    return_info.cost = -1;
+    return return_info;
+}
+
+std::string state_to_string_15(long long state_15)
+{
+    std::string result = "";
+    unsigned short state[16];
+
+    Node_15::get_array_from_long_long(state_15, state);
+
+    for(int i = 0; i < 16; i++)
+    {
+        result += state[i] + 48;
+
+    }
+
+    return result;
 }
