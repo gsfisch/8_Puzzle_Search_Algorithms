@@ -4,7 +4,7 @@
 #include "../include/Search.hpp"
 #include <fstream>
 
-/* 
+/*
 int find_puzzle_type(int argc, char *argv[])
 {
     int puzzle;
@@ -161,6 +161,14 @@ int main(int argc, char *argv[])
     std::chrono::microseconds duration;
     std::chrono::seconds duration_sec;
 
+    int expanded_acc = 0;
+    int cost_acc = 0;
+    std::chrono::microseconds duration_acc;
+    int h_mean_acc = 0;
+    int initial_h_acc = 0;
+
+    auto start_acc = std::chrono::high_resolution_clock::now();
+
     // Read each line's first element
     while(input >> state[0])
     {
@@ -213,12 +221,28 @@ int main(int argc, char *argv[])
             duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
         }
 
-        std::cout << return_info.number_of_expanded_nodes << " ";
-        std::cout << return_info.cost << " ";
-        std::cout << duration.count() << " ";
-        std::cout << return_info.mean_h_value << " ";
+        std::cout << return_info.number_of_expanded_nodes << ",";
+        std::cout << return_info.cost << ",";
+        std::cout << duration.count() << ",";
+        std::cout << return_info.mean_h_value << ",";
         std::cout << return_info.initial_state_h << std::endl;
+
+        expanded_acc += return_info.number_of_expanded_nodes;
+        cost_acc += return_info.cost;
+        std::chrono::microseconds duration_acc;
+        h_mean_acc += return_info.mean_h_value;
+        initial_h_acc += return_info.initial_state_h;
     }
+
+    auto stop_acc = std::chrono::high_resolution_clock::now();
+    duration_acc = std::chrono::duration_cast<std::chrono::microseconds>(stop_acc - start_acc);
+    std::cout << std::endl;
+
+    std::cout << expanded_acc << ",";
+    std::cout << cost_acc << ",";
+    std::cout << duration_acc.count() << ",";
+    std::cout << h_mean_acc << ",";
+    std::cout << initial_h_acc << std::endl;
 
     return 0;
 }
@@ -227,7 +251,7 @@ int main(int argc, char *argv[])
 
 // Driver for 15 Puzzle with instances in file
 // Example call:
-// ./main -bfs
+// ./main
 int main(int argc, char *argv[])
 {
     std::ifstream input("instances/15puzzle_instances.txt");
@@ -240,6 +264,14 @@ int main(int argc, char *argv[])
     SEARCH_INFO return_info;
     std::chrono::microseconds duration;
     std::chrono::seconds duration_sec;
+
+    int expanded_acc = 0;
+    int cost_acc = 0;
+    std::chrono::microseconds duration_acc;
+    int h_mean_acc = 0;
+    int initial_h_acc = 0;
+
+    auto start_acc = std::chrono::high_resolution_clock::now();
 
     // Read each line's first element
     while(input >> state_15[0])
@@ -259,12 +291,29 @@ int main(int argc, char *argv[])
         duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
         
         // Show results
-        std::cout << return_info.number_of_expanded_nodes << " ";
-        std::cout << return_info.cost << " ";
-        std::cout << duration.count() << " ";
-        std::cout << return_info.mean_h_value << " ";
+        std::cout << return_info.number_of_expanded_nodes << ",";
+        std::cout << return_info.cost << ",";
+        std::cout << duration.count() << ",";
+        std::cout << return_info.mean_h_value << ",";
         std::cout << return_info.initial_state_h << std::endl;
+
+        expanded_acc += return_info.number_of_expanded_nodes;
+        cost_acc += return_info.cost;
+        std::chrono::microseconds duration_acc;
+        h_mean_acc += return_info.mean_h_value;
+        initial_h_acc += return_info.initial_state_h;
     }
+
+
+    auto stop_acc = std::chrono::high_resolution_clock::now();
+    duration_acc = std::chrono::duration_cast<std::chrono::microseconds>(stop_acc - start_acc);
+    std::cout << std::endl;
+
+    std::cout << expanded_acc << ",";
+    std::cout << cost_acc << ",";
+    std::cout << duration_acc.count() << ",";
+    std::cout << h_mean_acc << ",";
+    std::cout << initial_h_acc << std::endl;
 
     return 0;
 }
