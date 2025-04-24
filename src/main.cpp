@@ -4,7 +4,7 @@
 #include "../include/Search.hpp"
 #include <fstream>
 
-/*
+
 int find_puzzle_type(int argc, char *argv[])
 {
     int puzzle;
@@ -145,7 +145,7 @@ int main(int argc, char *argv[])
     return 0;
 }
 
-
+/*
 // Driver for  8 Puzzle with instances in file
 // Example call:
 // ./main -bfs
@@ -247,7 +247,7 @@ int main(int argc, char *argv[])
     return 0;
 }
 
-*/
+
 
 // Driver for 15 Puzzle with instances in file
 // Example call:
@@ -317,4 +317,4 @@ int main(int argc, char *argv[])
 
     return 0;
 }
-
+*/
