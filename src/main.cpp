@@ -24,7 +24,7 @@ int find_puzzle_type(int argc, char *argv[])
 
     return puzzle;
 }
-
+/*
 int main(int argc, char *argv[])
 {
     int puzzle_type;
@@ -144,7 +144,7 @@ int main(int argc, char *argv[])
 
     return 0;
 }
-
+  */
 /*
 // Driver for  8 Puzzle with instances in file
 // Example call:
@@ -246,7 +246,7 @@ int main(int argc, char *argv[])
 
     return 0;
 }
-
+*/
 
 
 // Driver for 15 Puzzle with instances in file
@@ -317,4 +317,4 @@ int main(int argc, char *argv[])
 
     return 0;
 }
-*/
+

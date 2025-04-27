@@ -239,7 +239,7 @@ SEARCH_INFO bfs(Node root)
 }
 
 
-
+/*
 SEARCH_INFO gbfs(Node root)
 {
     std::priority_queue<Node, std::vector<Node>, compare_nodes_gbfs> q;
@@ -294,6 +294,62 @@ SEARCH_INFO gbfs(Node root)
     return_info.cost = -1;
     return return_info;
 }
+*/
+
+SEARCH_INFO gbfs(Node root) {
+    SEARCH_INFO info;
+    std::priority_queue<Node, std::vector<Node>, compare_nodes_gbfs> frontier;
+    //std::unordered_set< std::array<unsigned short> > visited;
+    std::unordered_map<std::string, float> visited;
+
+    frontier.push(root);
+
+    double total_h = 0.0;
+    info.initial_state_h = root.get_h_value();
+    info.mean_h_value = 0.0;
+    info.number_of_expanded_nodes = 0;
+
+    while (!frontier.empty()) {
+        Node current = frontier.top();
+        frontier.pop();
+
+        //auto current_arr = state_to_array(current.state);
+        if (visited.count( state_to_string(current.get_state()))) continue;
+
+        visited[state_to_string( current.get_state())] = current.get_g_value();
+        //info.number_of_expanded_nodes++;
+        //info.mean_h_value  += current.get_h_value();
+        //total_h += current.h_value;
+
+        if (current.is_goal()) {
+            info.cost = current.get_g_value();
+            break;
+        }
+        info.number_of_expanded_nodes++;
+        unsigned short succs_states[4][9];
+        int num_succs = 0;
+
+
+        current.calculate_succs_states(succs_states);
+
+        for (int i = 0; i < current.get_number_of_succs(); ++i) {
+            Node succ = Node(succs_states[i], current.get_g_value() + 1, current.get_state());
+
+            //auto succ_arr = state_to_array(succ.state);
+            if (!visited.count( state_to_string(succ.get_state()))) {
+                info.mean_h_value  += succ.get_h_value();
+                frontier.push(succ);
+            }
+        }
+    }
+
+    if (info.number_of_expanded_nodes > 0)
+        info.mean_h_value = info.mean_h_value / info.number_of_expanded_nodes;
+
+    return info;
+}
+
+
 
 SEARCH_INFO a_star(Node root)
 {
@@ -491,7 +547,6 @@ SEARCH_INFO a_star_15(Node_15 root)
     return_info.cost = 0;
     return_info.number_of_expanded_nodes = 0;
 
-    //std::cout << "Dentro do a* 15" << std::endl;
 
     q.push(root);
 
@@ -511,7 +566,7 @@ SEARCH_INFO a_star_15(Node_15 root)
         
         return_info.mean_h_value += (double) current_node.get_h_value();
 
-        //std::cout << "1" << std::endl;
+
 
         // Check if it is goal
         if(current_node.is_goal())
@@ -522,13 +577,10 @@ SEARCH_INFO a_star_15(Node_15 root)
         }
         
         return_info.number_of_expanded_nodes++;
-        //std::cout << current_node.get_h_value() << std::endl;
-        //std::cout << return_info.mean_h_value << std::endl;
-        //std::cout << "2" << std::endl;
+
         // Compute neighbors
         current_node.calculate_succs_states(current_node_neighbors);
 
-        //std::cout << "3" << std::endl;
 
         // Add neighbors to the queue
         for(int i = 0; i < current_node.get_number_of_succs(); i++)
