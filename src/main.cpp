@@ -2,9 +2,9 @@
 #include <chrono>
 #include <string.h>
 #include "../include/Search.hpp"
-#include <fstream>
+#include <fstream>  // Used for file reading
 
-/*
+
 int find_puzzle_type(int argc, char *argv[])
 {
     int puzzle;
@@ -145,7 +145,7 @@ int main(int argc, char *argv[])
     return 0;
 }
 
-
+/*
 // Driver for  8 Puzzle with instances in file
 // Example call:
 // ./main -bfs
@@ -247,7 +247,7 @@ int main(int argc, char *argv[])
     return 0;
 }
 
-*/
+
 
 // Driver for 15 Puzzle with instances in file
 // Example call:
@@ -283,7 +283,6 @@ int main(int argc, char *argv[])
             input >> state_15[i];
             //std::cout << state_15[i] << " ";
         }
-        //std::cout << std::endl;
 
         auto start = std::chrono::high_resolution_clock::now();
         return_info = a_star_15(Node_15(Node_15::get_long_long_from_array(state_15), 0, Node_15::get_long_long_from_array(parent_state_15))); 
@@ -318,3 +317,4 @@ int main(int argc, char *argv[])
     return 0;
 }
 
+*/
